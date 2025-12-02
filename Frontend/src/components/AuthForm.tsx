@@ -18,7 +18,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up" }) => {
 
   return (
     <form
-      className="space-y-6"
+      className="space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         // auth logic will be wired later
@@ -101,7 +101,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up" }) => {
       {/* Submit */}
       <button
         type="submit"
-        className="inline-flex w-full items-center justify-center rounded-full bg-dark-900 px-4 py-3 text-sm font-medium text-light-100 transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-900 focus-visible:ring-offset-2"
+        className="inline-flex w-full items-center justify-center rounded-full mt-4 bg-dark-900 px-4 py-3 text-sm font-semibold text-light-100 transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-900 focus-visible:ring-offset-2"
       >
         {buttonLabel}
       </button>
