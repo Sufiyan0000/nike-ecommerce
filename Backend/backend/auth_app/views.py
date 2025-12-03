@@ -5,6 +5,7 @@ from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
 from . import services
 
@@ -25,7 +26,7 @@ def _set_guest_cookie(response: HttpResponse, token: str):
 def _clear_guest_cookie(response: HttpResponse):
     response.delete_cookie("guest_session", path="/")
 
-
+@csrf_exempt
 @require_POST
 def sign_up_view(request: HttpRequest) -> HttpResponse:
     email = request.POST.get("email", "").strip()
@@ -47,7 +48,7 @@ def sign_up_view(request: HttpRequest) -> HttpResponse:
 
     return response
 
-
+@csrf_exempt
 @require_POST
 def sign_in_view(request: HttpRequest) -> HttpResponse:
     email = request.POST.get("email", "").strip()
@@ -69,14 +70,14 @@ def sign_in_view(request: HttpRequest) -> HttpResponse:
 
     return response
 
-
+@csrf_exempt
 @require_POST
 def sign_out_view(request: HttpRequest) -> HttpResponse:
     services.sign_out(request)
     response = JsonResponse({"message": "Signed out successfully"})
     return response
 
-
+@csrf_exempt
 def create_guest_session_view(request: HttpRequest) -> HttpResponse:
     """
     Create guest session if not already present.

@@ -1,9 +1,29 @@
 // src/app/(auth)/sign-in/page.tsx
+'use client';
+
+
 import Link from "next/link";
 import SocialProviders from "@/src/components/SocialProviders";
 import AuthForm from "@/src/components/AuthForm";
+import { useState } from "react";
+import { signIn } from "@/src/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
+
+  const [msg,setMsg] = useState('');
+  const router = useRouter();
+
+  const handleSignIn = async ({ email,password}: any) => {
+    try{
+      const res = await signIn(email,password);
+      setMsg(res.data.message);
+      router.push('/');
+    }catch(e:any){
+      setMsg(e.response?.data?.error ?? "Login failed.");
+    }
+  }
+
   return (
     <div className="space-y-5">
       {/* Top copy */}
@@ -38,7 +58,7 @@ export default function SignInPage() {
       </div>
 
       {/* Email/password form */}
-      <AuthForm mode="sign-in" />
+      <AuthForm mode="sign-in" onSubmit={handleSignIn}/>
     </div>
   );
 }

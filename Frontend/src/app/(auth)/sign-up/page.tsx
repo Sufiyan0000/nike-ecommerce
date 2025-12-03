@@ -1,9 +1,28 @@
 // src/app/(auth)/sign-up/page.tsx
+'use client';
+
 import Link from "next/link";
 import SocialProviders from "@/src/components/SocialProviders";
 import AuthForm from "@/src/components/AuthForm";
+import { signUp } from "@/src/lib/api";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
+
+  const [msg,setMsg] = useState('');
+  const router = useRouter();
+
+  const handleSignUp = async ({email,password ,name}:any) => {
+    try{
+      const res = await signUp(email,password , name);
+      setMsg(res.data.message);
+      router.push('/sign-in');
+    }catch(e:any){
+      setMsg(e.res?.data?.e ?? 'Signup failed')
+    }
+  }
+
   return (
     <div className="space-y-5 ">
       {/* Top copy */}
@@ -38,7 +57,7 @@ export default function SignUpPage() {
       </div>
 
       {/* Email/password form */}
-      <AuthForm mode="sign-up" />
+      <AuthForm mode="sign-up" onSubmit={handleSignUp} />
     </div>
   );
 }

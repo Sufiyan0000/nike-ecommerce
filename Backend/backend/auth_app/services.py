@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.db import transaction
 from django.http import HttpRequest
-from django.contrib.auth.models import User
+
 
 from .models import Session, Account, Guest
 

@@ -11,6 +11,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv('DEBUG') == 'True'
+
+
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(",")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'auth_app',
 ]
 
@@ -50,10 +61,11 @@ SESSION_COOKIE_SAMESITE = "Strict"
 SESSION_COOKIE_SECURE = False  # True in production (HTTPS)
 
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SAMESITE = "Strict"
-CSRF_COOKIE_SECURE = False  # True in production
+# CSRF_COOKIE_SAMESITE = "Strict"
+# CSRF_COOKIE_SECURE = False  # True in production
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,6 +74,24 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_CREDENTIALS = True  
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",           # dev Next.js
+    "http://localhost:3000",     # prod
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    # "https://your-frontend.com",
+]
+
+SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "None"
+
+SESSION_COOKIE_SECURE = False  
+CSRF_COOKIE_SECURE = False
 
 ROOT_URLCONF = 'backend.urls'
 

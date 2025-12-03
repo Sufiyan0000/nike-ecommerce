@@ -1,20 +1,29 @@
 // src/components/AuthForm.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
 type Mode = "sign-in" | "sign-up";
 
 interface AuthFormProps {
   mode?: Mode;
+  onSubmit: ( data: {
+    name?: string;
+    email: string;
+    password: string;
+  }) => void | Promise<void>;
 }
 
 const baseInputClasses =
   "w-full rounded-xl border border-light-300 bg-light-100 px-3 py-2.5 text-sm text-dark-900 placeholder:text-dark-500 focus:outline-none focus:ring-2 focus:ring-dark-900 focus:ring-offset-2";
 
-const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up" }) => {
+const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up",onSubmit }) => {
   const isSignIn = mode === "sign-in";
   const buttonLabel = isSignIn ? "Sign In" : "Sign Up";
+
+  const [name,setName] = useState('');
+  const [email,setEmail] = useState('');
+  const [password,setPassword] = useState('');
 
   return (
     <form
@@ -22,6 +31,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up" }) => {
       onSubmit={(e) => {
         e.preventDefault();
         // auth logic will be wired later
+        onSubmit({ name, email , password});
+
       }}
     >
       {/* Name (sign up only) */}
@@ -38,6 +49,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up" }) => {
             type="text"
             placeholder="Enter your full name"
             className={baseInputClasses}
+            onChange={(e) => setName(e.target.value)}
             autoComplete="name"
             required
           />
@@ -54,6 +66,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up" }) => {
           type="email"
           placeholder="johndoe@gmail.com"
           className={baseInputClasses}
+          onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           required
         />
@@ -74,6 +87,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up" }) => {
             isSignIn ? "Enter your password" : "minimum 8 characters"
           }
           className={baseInputClasses}
+          onChange={(e) => setPassword(e.target.value)}
           autoComplete={isSignIn ? "current-password" : "new-password"}
           required
         />
