@@ -115,7 +115,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up",onSubmit }) => {
       {/* Submit */}
       <button
         type="submit"
-        className="inline-flex w-full items-center justify-center rounded-full mt-4 bg-dark-900 px-4 py-3 text-sm font-semibold text-light-100 transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-900 focus-visible:ring-offset-2"
+        className="inline-flex w-full items-center justify-center rounded-full mt-4 bg-dark-900 px-4 py-3 text-sm font-semibold text-light-100 transition hover:bg-black/80 hover:cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-900 focus-visible:ring-offset-2"
       >
         {buttonLabel}
       </button>

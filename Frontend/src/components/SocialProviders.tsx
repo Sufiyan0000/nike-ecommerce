@@ -24,7 +24,7 @@ const SocialProviders: React.FC<SocialProvidersProps> = ({
         aria-label={googleLabel}
       >
         <Image
-          src="/icons/google.svg"
+          src="/google.svg"
           alt=""
           width={18}
           height={18}
@@ -39,7 +39,7 @@ const SocialProviders: React.FC<SocialProvidersProps> = ({
         aria-label={appleLabel}
       >
         <Image
-          src="/icons/apple.svg"
+          src="/apple.svg"
           alt=""
           width={18}
           height={18}
