@@ -13,9 +13,9 @@ export default function SignUpPage() {
   const [msg,setMsg] = useState('');
   const router = useRouter();
 
-  const handleSignUp = async ({email,password ,name}:any) => {
+  const handleSignUp = async ({email,password ,username}:any) => {
     try{
-      const res = await signUp(email,password , name);
+      const res = await signUp(email,password , username);
       setMsg(res.data.message);
       router.push('/sign-in');
     }catch(e:any){

@@ -8,7 +8,7 @@ type Mode = "sign-in" | "sign-up";
 interface AuthFormProps {
   mode?: Mode;
   onSubmit: ( data: {
-    name?: string;
+    username?: string;
     email: string;
     password: string;
   }) => void | Promise<void>;
@@ -21,7 +21,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up",onSubmit }) => {
   const isSignIn = mode === "sign-in";
   const buttonLabel = isSignIn ? "Sign In" : "Sign Up";
 
-  const [name,setName] = useState('');
+  const [username,setUserName] = useState('');
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
 
@@ -31,7 +31,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up",onSubmit }) => {
       onSubmit={(e) => {
         e.preventDefault();
         // auth logic will be wired later
-        onSubmit({ name, email , password});
+        onSubmit({ username, email , password});
 
       }}
     >
@@ -39,17 +39,17 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up",onSubmit }) => {
       {!isSignIn && (
         <div className="space-y-1.5">
           <label
-            htmlFor="fullName"
+            htmlFor="name"
             className="text-xs font-medium text-dark-700"
           >
-            Full Name
+            Name
           </label>
           <input
-            id="fullName"
+            id="name"
             type="text"
-            placeholder="Enter your full name"
+            placeholder="Enter your name"
             className={baseInputClasses}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setUserName(e.target.value)}
             autoComplete="name"
             required
           />
