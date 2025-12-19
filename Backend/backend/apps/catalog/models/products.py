@@ -11,6 +11,7 @@ from .filters import Gender
 
 class Product(BaseModel):
     name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True)
     description = models.TextField(blank=True)
     category = models.ForeignKey(
         Category,
@@ -60,7 +61,7 @@ class ProductImage(BaseModel):
         on_delete=models.CASCADE,
         related_name="images",
     )
-    url = models.CharField(max_length=500)  # can be URL or media path
+    image = models.ImageField(upload_to='products/')
     sort_order = models.PositiveIntegerField(default=0)
     is_primary = models.BooleanField(default=False)
 
@@ -71,5 +72,5 @@ class ProductImage(BaseModel):
         ]
 
     def __str__(self) -> str:
-        return f"Image for {self.product} ({self.url})"
+        return f"Image for {self.product}"
 

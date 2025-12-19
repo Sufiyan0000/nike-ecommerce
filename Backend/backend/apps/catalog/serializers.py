@@ -56,17 +56,15 @@ class CategorySerializer(serializers.ModelSerializer):
 # ---------- Product-related serializers ----------
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductImage
-        fields = [
-            "id",
-            "product",
-            "variant",
-            "url",
-            "sort_order",
-            "is_primary",
-        ]
-        read_only_fields = ["id"]
+        fields = ["url", "is_primary", "sort_order"]
+
+    def get_url(self, obj):
+        request = self.context.get("request")
+        return request.build_absolute_uri(obj.image.url)
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):

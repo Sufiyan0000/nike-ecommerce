@@ -7,6 +7,7 @@ from typing import List
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.text import slugify
+from django.core.files import File
 
 from apps.catalog.models import (
     Gender,
@@ -28,6 +29,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.WARNING("Starting catalog seeding..."))
 
+        BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+        seed_images_dir = BASE_DIR / "seed_assets" / "products"
+        media_products_dir = BASE_DIR / "media" / "products"
+
+        available_images = list(seed_images_dir.glob("*.*"))
+
         with transaction.atomic():
             genders = self._seed_genders()
             colors = self._seed_colors()
@@ -35,16 +43,30 @@ class Command(BaseCommand):
             brand = self._seed_brand()
             categories = self._seed_categories()
             collections = self._seed_collections()
-            self._seed_products(
-                brand=brand,
-                genders=genders,
-                colors=colors,
-                sizes=sizes,
-                categories=categories,
-                collections=collections,
+
+        # ✅ IMPORTANT: get created products back
+        products = self._seed_products(
+            brand=brand,
+            genders=genders,
+            colors=colors,
+            sizes=sizes,
+            categories=categories,
+            collections=collections,
+        )
+
+        # ✅ SEED IMAGES
+        for product in products:
+            variants = list(product.variants.all())
+
+            self._create_images_for_product(
+                product=product,
+                variants=variants,
+                available_images=available_images,
+                media_products_dir=media_products_dir,
             )
 
         self.stdout.write(self.style.SUCCESS("✅ Catalog seeding completed."))
+
 
     # ---------- Filters ----------
 
@@ -155,6 +177,7 @@ class Command(BaseCommand):
 
     # ---------- Products, Variants, Images ----------
 
+
     def _seed_products(
         self,
         brand: Brand,
@@ -163,14 +186,29 @@ class Command(BaseCommand):
         sizes: List[Size],
         categories: List[Category],
         collections: List[Collection],
-    ) -> None:
-        self.stdout.write("Seeding products, variants & images...")
+    ) -> List[Product]:
+        self.stdout.write("Seeding products & variants...")
 
-        # where your raw images exist (e.g. downloaded sample shoes)
-        source_images_dir = Path("public/shoes")
-        # where you want to copy/store them
-        uploads_dir = Path("static/uploads/products")
-        uploads_dir.mkdir(parents=True, exist_ok=True)
+        BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+        # ✅ backend seed assets (NOT frontend public/)
+        source_images_dir = BASE_DIR / "seed_assets" / "products"
+
+        # ✅ MEDIA/products directory
+        media_products_dir = BASE_DIR / "media" / "products"
+        media_products_dir.mkdir(parents=True, exist_ok=True)
+
+        available_images = list(source_images_dir.glob("*.jpg")) + list(
+            source_images_dir.glob("*.png")
+        )
+
+        if not available_images:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"⚠ No images found in {source_images_dir}. "
+                    "Products will be created without images."
+                )
+            )
 
         product_names = [
             "Nike Air Zoom Pegasus",
@@ -179,7 +217,7 @@ class Command(BaseCommand):
             "Nike Zoom Fly",
             "Nike React Infinity Run",
             "Nike Air Force 1 Low",
-            "Nike Air Force 1 High",
+            "Nike Air Force 1 07",
             "Nike Metcon Trainer",
             "Nike Flex Experience",
             "Nike ZoomX Vaporfly",
@@ -190,26 +228,17 @@ class Command(BaseCommand):
             "Nike Winflo Performance",
         ]
 
-        available_images = list(source_images_dir.glob("*.jpg")) + list(
-            source_images_dir.glob("*.png")
-        ) 
-
-        if not available_images:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"  ⚠ No images found in {source_images_dir}. "
-                    "Products will still be created but without real files."
-                )
-            )
+        products: List[Product] = []
 
         for name in product_names:
             slug = slugify(name)
-            category = random.choice(categories[1:])  # running or lifestyle
+            category = random.choice(categories[1:])
             gender = random.choice(genders)
 
             product, created = Product.objects.get_or_create(
                 name=name,
                 defaults={
+                    "slug": slug,
                     "description": f"{name} – premium performance running shoe.",
                     "category": category,
                     "gender": gender,
@@ -217,6 +246,7 @@ class Command(BaseCommand):
                     "is_published": True,
                 },
             )
+
             if created:
                 self.stdout.write(f"  + Product: {name}")
 
@@ -231,12 +261,18 @@ class Command(BaseCommand):
                 product.save(update_fields=["default_variant"])
 
             self._attach_collections(product, collections)
+
+            # ✅ CREATE IMAGES (MEDIA-based)
             self._create_images_for_product(
                 product=product,
                 variants=variants,
                 available_images=available_images,
-                uploads_dir=uploads_dir,
+                media_products_dir=media_products_dir,
             )
+
+            products.append(product)
+
+        return products
 
     def _create_variants_for_product(
         self,
@@ -288,48 +324,43 @@ class Command(BaseCommand):
                 collection=col,
             )
 
+    
     def _create_images_for_product(
         self,
         product: Product,
         variants: List[ProductVariant],
         available_images: List[Path],
-        uploads_dir: Path,
+        media_products_dir: Path,
     ) -> None:
+        """
+        Correct seeder for ProductImage using ImageField (MEDIA).
+        """
+
+        # Ensure MEDIA/products exists
+        media_products_dir.mkdir(parents=True, exist_ok=True)
+
+        # If no seed images exist, skip (DO NOT create fake URLs)
         if not available_images:
-            # Just create fake URLs
-            for idx in range(2):
-                ProductImage.objects.get_or_create(
-                    product=product,
-                    sort_order=idx,
-                    defaults={
-                        "url": f"/static/uploads/products/{slugify(product.name)}-{idx}.jpg",
-                        "is_primary": idx == 0,
-                    },
-                )
             return
 
+        # Pick up to 3 random images
         selected_images = random.sample(
-            available_images, k=min(3, len(available_images))
+            available_images,
+            k=min(3, len(available_images)),
         )
 
         for idx, src in enumerate(selected_images):
-            dest_filename = f"{slugify(product.name)}-{idx}{src.suffix}"
-            dest_path = uploads_dir / dest_filename
+            dest_filename = f"{product.slug}-{idx}{src.suffix}"
+            dest_path = media_products_dir / dest_filename
 
-            try:
-                shutil.copy2(src, dest_path)
-            except Exception as e:
-                self.stdout.write(
-                    self.style.ERROR(
-                        f"    ! Failed to copy {src} -> {dest_path}: {e}"
-                    )
+            # Copy image into MEDIA/products/
+            shutil.copy2(src, dest_path)
+
+            # Save image properly via ImageField
+            with open(dest_path, "rb") as f:
+                ProductImage.objects.create(
+                    product=product,
+                    image=File(f, name=f"products/{dest_filename}"),
+                    sort_order=idx,
+                    is_primary=(idx == 0),
                 )
-
-            ProductImage.objects.get_or_create(
-                product=product,
-                sort_order=idx,
-                defaults={
-                    "url": f"/static/uploads/products/{dest_filename}",
-                    "is_primary": idx == 0,
-                },
-            )
