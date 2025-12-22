@@ -326,37 +326,38 @@ class Command(BaseCommand):
 
     
     def _create_images_for_product(
-        self,
-        product: Product,
-        variants: List[ProductVariant],
-        available_images: List[Path],
-        media_products_dir: Path,
-    ) -> None:
+    self,
+    product: Product,
+    variants: List[ProductVariant],
+    available_images: List[Path],
+    media_products_dir: Path,
+) -> None:
         """
         Correct seeder for ProductImage using ImageField (MEDIA).
+        Each product gets UNIQUE images (no reuse).
         """
 
-        # Ensure MEDIA/products exists
         media_products_dir.mkdir(parents=True, exist_ok=True)
 
-        # If no seed images exist, skip (DO NOT create fake URLs)
+        # Stop if no images left
         if not available_images:
             return
 
-        # Pick up to 3 random images
-        selected_images = random.sample(
-            available_images,
-            k=min(3, len(available_images)),
-        )
+        # Decide how many images per product
+        IMAGES_PER_PRODUCT = 2
+
+        # Take images from the FRONT of the list
+        selected_images = available_images[:IMAGES_PER_PRODUCT]
+
+        # REMOVE them so next product can't reuse
+        del available_images[:IMAGES_PER_PRODUCT]
 
         for idx, src in enumerate(selected_images):
             dest_filename = f"{product.slug}-{idx}{src.suffix}"
             dest_path = media_products_dir / dest_filename
 
-            # Copy image into MEDIA/products/
             shutil.copy2(src, dest_path)
 
-            # Save image properly via ImageField
             with open(dest_path, "rb") as f:
                 ProductImage.objects.create(
                     product=product,

@@ -64,7 +64,14 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
     def get_url(self, obj):
         request = self.context.get("request")
-        return request.build_absolute_uri(obj.image.url)
+
+        if not obj.image:
+            return None
+
+        if request:
+            return request.build_absolute_uri(obj.image.url)
+
+        return obj.image.url  # fallback
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):
@@ -117,7 +124,7 @@ class ProductSerializer(serializers.ModelSerializer):
     brand_id = serializers.PrimaryKeyRelatedField(
         source="brand", queryset=Brand.objects.all(), write_only=True
     )
-    images = ProductImageSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True) # Why many = True? Does it makes one product having more than one image url?
 
     class Meta:
         model = Product

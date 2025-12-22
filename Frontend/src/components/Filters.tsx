@@ -37,15 +37,15 @@ export default function Filters() {
           : [];
 
         return (
-          <div key={key}>
+          <div key={key} className="">
             <h3 className="font-medium capitalize">{key}</h3>
 
             {options.map((value) => (
-              <label key={value} className="flex items-center gap-2">
+              <label key={value} className="flex items-center gap-2 pb-1">
                 <input
                   type="checkbox"
                   checked={selectedValues.includes(value)}
-                  onChange={() => toggle(key, value)}
+                  onChange={() => toggle(key, value)}                
                 />
                 {value}
               </label>

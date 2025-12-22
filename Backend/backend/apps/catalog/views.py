@@ -49,7 +49,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             "images",
             Prefetch("reviews", queryset=Review.objects.select_related("user")),
         )
-        .all()
     )
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -58,20 +57,25 @@ class ProductViewSet(viewsets.ModelViewSet):
     ordering = ["-created_at"]
 
     def get_serializer_class(self):
-        # You can use a different serializer for detail view if needed
         if self.action == "retrieve":
             return ProductDetailSerializer
         return ProductSerializer
 
+    # ✅ THIS IS THE FIX
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
     @action(detail=True, methods=["get"], permission_classes=[permissions.AllowAny])
     def variants(self, request, pk=None):
-        """
-        /api/catalog/products/{id}/variants/
-        Get variants for a product.
-        """
         product = self.get_object()
         qs = product.variants.select_related("color", "size")
-        serializer = ProductVariantSerializer(qs, many=True)
+        serializer = ProductVariantSerializer(
+            qs,
+            many=True,
+            context={"request": request},  # ✅ also safe here
+        )
         return Response(serializer.data)
 
 

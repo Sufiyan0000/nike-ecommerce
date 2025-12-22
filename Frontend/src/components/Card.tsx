@@ -7,7 +7,7 @@ type ProductImage = {
 
 type ProductVariant = {
   price: number;
-};
+}; 
 
 type Product = {
   name: string;
@@ -20,6 +20,11 @@ type CardProps = {
 };
 
 export default function Card({ product }: CardProps) {
+
+  if (!product) {
+    return null;
+  }
+
   // 1️⃣ Pick primary image first, else fallback to first image
   const imageObj =
     product.images?.find((img) => img.is_primary) ??
@@ -31,9 +36,9 @@ export default function Card({ product }: CardProps) {
   const price = product.variants?.[0]?.price;
 
   return (
-    <div className="group border rounded-lg overflow-hidden bg-white">
+    <div className="group border border-gray-400 rounded-lg overflow-hidden bg-white sm:w-90 mx-auto md:mx-0 md:w-80 md:h-90">
       {/* IMAGE */}
-      <div className="relative aspect-square bg-gray-100">
+      <div className="relative aspect-square bg-gray-100 w-full h-80 overflow-hidden ">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -41,6 +46,7 @@ export default function Card({ product }: CardProps) {
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 33vw"
+            unoptimized
           />
         ) : (
           <div className="flex items-center justify-center h-full text-sm text-gray-400">
@@ -50,8 +56,8 @@ export default function Card({ product }: CardProps) {
       </div>
 
       {/* CONTENT */}
-      <div className="p-3 space-y-1">
-        <h3 className="text-sm font-medium line-clamp-2">
+      <div className="p-3 space-y-1 ">
+        <h3 className="text-md pb-3 font-semibold line-clamp-2">
           {product.name}
         </h3>
 
