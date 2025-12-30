@@ -1,13 +1,47 @@
 import qs from "query-string";
 
-export function parseQuery(searchParams: Record<string, string | string[]>) {
-  return qs.parse(qs.stringify(searchParams), {
-    arrayFormat: "comma",
-  });
+export function parseQuery(
+  searchParams:
+    | URLSearchParams
+    | Record<string, string | string[] | undefined>
+) {
+  const query: Record<string, string | string[]> = {};
+
+  // ✅ Case 1: URLSearchParams (from useSearchParams)
+  if (searchParams instanceof URLSearchParams) {
+    for (const [key, value] of searchParams.entries()) {
+      if (query[key]) {
+        query[key] = Array.isArray(query[key])
+          ? [...query[key], value]
+          : [query[key] as string, value];
+      } else {
+        query[key] = value;
+      }
+    }
+    return query;
+  }
+
+  // ✅ Case 2: Plain object
+  for (const key in searchParams) {
+    const value = searchParams[key];
+    if (value === undefined || value === "") continue;
+
+    if (Array.isArray(value)) {
+      query[key] = value;
+    } else {
+      query[key] = value;
+    }
+  }
+
+  return query;
 }
 
+
+
+type QueryValue = string | string[] | undefined;
+
 export function toggleMultiValue(
-  query: any,
+  query: Record<string,QueryValue>,
   key: string,
   value: string
 ) {
@@ -41,7 +75,7 @@ export function setSingleValue(query: any, key: string, value: string) {
 
 export function stringifyQuery(query: any) {
   return qs.stringify(query, {
-    arrayFormat: "comma",
+    arrayFormat: "none",
     skipNull: true,
     skipEmptyString: true,
   });

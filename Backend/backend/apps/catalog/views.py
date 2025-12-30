@@ -16,7 +16,7 @@ from .models.filters.sizes import Size
 from .models.brands import Brand  # if you created a separate brands.py
 from .models.wishlists import Wishlist  # if separate file
 
-from .serializers import (
+from .serializers.serializers import (
     ProductSerializer,
     ProductDetailSerializer,
     ProductVariantSerializer,
@@ -24,11 +24,11 @@ from .serializers import (
     CollectionSerializer,
     ReviewSerializer,
     GenderSerializer,
-    ColorSerializer,
-    SizeSerializer,
     BrandSerializer,
     WishlistSerializer,
 )
+
+from .serializers.ProductVariant import ColorSerializer,SizeSerializer
 
 from apps.core.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 
@@ -41,18 +41,64 @@ class ProductViewSet(viewsets.ModelViewSet):
     List, retrieve, search, filter products.
     Admins can create/update/delete.
     """
-    queryset = (
-        Product.objects
-        .select_related("category", "gender", "brand", "default_variant")
-        .prefetch_related(
-            "variants",
-            "images",
-            Prefetch("reviews", queryset=Review.objects.select_related("user")),
+
+    def get_queryset(self):
+
+        def split_param(key):
+            value = request.GET.get(key)
+            if not value:
+                return []
+            split = value.split(",")
+            return split
+
+        queryset = (
+            Product.objects
+            .select_related("category", "gender", "brand", "default_variant")
+            .prefetch_related(
+                "variants",
+                "images",
+                Prefetch("reviews", queryset=Review.objects.select_related("user")),
+            )
         )
-    )
+        request = self.request
+
+        # 🔹 MULTI-VALUE FILTERS (comma-separated)
+        colors = split_param("color")
+        sizes = split_param("size")
+        genders = split_param("gender")
+        brands = split_param("brand")
+        categories = split_param("category")
+
+        if colors:
+            queryset = queryset.filter(
+                variants__color__slug__in=colors
+            )
+
+        if sizes:
+            queryset = queryset.filter(
+                variants__size__slug__in=sizes
+            )
+
+        if genders:
+            queryset = queryset.filter(
+                gender__slug__in=genders
+            )
+
+        if brands:
+            queryset = queryset.filter(
+                brand__slug__in=brands
+            )
+
+        if categories:
+            queryset = queryset.filter(
+                category__slug__in=categories
+            )
+
+        return queryset.distinct()
+
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ["name", "description", "brand__name", "category__name"]
+    search_fields = ["id","name", "description", "brand__name", "category__name"]
     ordering_fields = ["created_at", "updated_at"]
     ordering = ["-created_at"]
 
@@ -82,12 +128,56 @@ class ProductViewSet(viewsets.ModelViewSet):
 class ProductVariantViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only list of variants.
-    Usually you don't let users create variants; admin uses Django admin.
+    Filtering happens here (color, size, price, stock).
     """
-    queryset = ProductVariant.objects.select_related("product", "color", "size").all()
+
     serializer_class = ProductVariantSerializer
     permission_classes = [permissions.AllowAny]
 
+    # ordering
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ["price", "in_stock"]
+    ordering = ["price"]
+
+    def get_queryset(self):
+        queryset = ProductVariant.objects.select_related(
+            "product", "color", "size"
+        )
+
+        params = self.request.query_params
+
+        # 🔗 PRODUCT (optional)
+        product_slug = params.get("product_slug")
+        if product_slug:
+            queryset = queryset.filter(product__slug=product_slug)
+
+        # 🎨 COLOR FILTER (IMPORTANT)
+        color = params.get("color")
+        if color:
+            colors = color.split(",")  # red,black
+            queryset = queryset.filter(color__slug__in=colors)
+
+        # 📏 SIZE FILTER
+        size = params.get("size")
+        if size:
+            sizes = size.split(",")
+            queryset = queryset.filter(size__slug__in=sizes)
+
+        # 💰 PRICE RANGE
+        price_min = params.get("price_min")
+        if price_min:
+            queryset = queryset.filter(price__gte=price_min)
+
+        price_max = params.get("price_max")
+        if price_max:
+            queryset = queryset.filter(price__lte=price_max)
+
+        # 📦 IN STOCK ONLY
+        in_stock = params.get("in_stock")
+        if in_stock == "true":
+            queryset = queryset.filter(in_stock__gt=0)
+
+        return queryset
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.select_related("parent").all()

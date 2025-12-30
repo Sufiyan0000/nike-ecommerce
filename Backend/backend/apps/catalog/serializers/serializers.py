@@ -3,16 +3,14 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models.products import Product, ProductImage
-from .models.variants import ProductVariant
-from .models.categories import Category
-from .models.collections import Collection, ProductCollection
-from .models.reviews import Review
-from .models.filters.genders import Gender
-from .models.filters.colors import Color
-from .models.filters.sizes import Size
-from .models.brands import Brand
-from .models.wishlists import Wishlist  # if you created it here
+from ..models.products import Product, ProductImage
+from ..models.categories import Category
+from ..models.collections import Collection, ProductCollection
+from ..models.reviews import Review
+from ..models.filters.genders import Gender
+from ..models.brands import Brand
+from ..models.wishlists import Wishlist  # if you created it here
+from .ProductVariant import ProductVariantSerializer
 
 User = get_user_model()
 
@@ -20,21 +18,11 @@ User = get_user_model()
 # ---------- Filter / taxonomy serializers ----------
 
 class GenderSerializer(serializers.ModelSerializer):
+    filterset = ["id",]
     class Meta:
         model = Gender
         fields = ["id", "label", "slug"]
 
-
-class ColorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Color
-        fields = ["id", "name", "slug", "hex_code"]
-
-
-class SizeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Size
-        fields = ["id", "name", "slug", "sort_order"]
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -74,47 +62,12 @@ class ProductImageSerializer(serializers.ModelSerializer):
         return obj.image.url  # fallback
 
 
-class ProductVariantSerializer(serializers.ModelSerializer):
-    color = ColorSerializer(read_only=True)
-    size = SizeSerializer(read_only=True)
-    color_id = serializers.PrimaryKeyRelatedField(
-        source="color",
-        queryset=Color.objects.all(),
-        write_only=True,
-        required=True,
-    )
-    size_id = serializers.PrimaryKeyRelatedField(
-        source="size",
-        queryset=Size.objects.all(),
-        write_only=True,
-        required=True,
-    )
-
-    class Meta:
-        model = ProductVariant
-        fields = [
-            "id",
-            "product",
-            "sku",
-            "price",
-            "sale_price",
-            "color",
-            "size",
-            "color_id",
-            "size_id",
-            "in_stock",
-            "weight",
-            "dimensions",
-            "created_at",
-        ]
-        read_only_fields = ["id", "created_at"]
-
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     gender = GenderSerializer(read_only=True)
     brand = BrandSerializer(read_only=True)
-    default_variant = ProductVariantSerializer(read_only=True)
+    # default_variant = ProductVariantSerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(
         source="category", queryset=Category.objects.all(), write_only=True
     )
@@ -125,12 +78,18 @@ class ProductSerializer(serializers.ModelSerializer):
         source="brand", queryset=Brand.objects.all(), write_only=True
     )
     images = ProductImageSerializer(many=True, read_only=True) # Why many = True? Does it makes one product having more than one image url?
+    variants = serializers.SerializerMethodField()
 
+    def get_variants(self,obj):
+        from .ProductVariant import ProductVariantSerializer
+        return ProductVariantSerializer(obj.variants.all(),many=True).data
+    
     class Meta:
         model = Product
         fields = [
             "id",
             "name",
+            "slug",
             "description",
             "category",
             "category_id",
@@ -139,12 +98,13 @@ class ProductSerializer(serializers.ModelSerializer):
             "brand",
             "brand_id",
             "is_published",
-            "default_variant",
+            "variants",
             "created_at",
             "updated_at",
             "images",
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "default_variant", "images"]
+        read_only_fields = ["id", "created_at", "updated_at", "variants", "images"]
+
 
 
 class ReviewUserSerializer(serializers.ModelSerializer):

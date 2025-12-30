@@ -17,9 +17,9 @@ interface NavbarProps {
 }
 
 const defaultNavItems: NavItem[] = [
-  { label: "Men", href: "/men" },
-  { label: "Women", href: "/women" },
-  { label: "Kids", href: "/kids" },
+  { label: "Men", href: "/products?gender=men" },
+  { label: "Women", href: "/products?gender=women" },
+  { label: "Kids", href: "/products?gender=kids" },
   { label: "Collections", href: "/collections" },
   { label: "Contact", href: "/contact" },
 ];

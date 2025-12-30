@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from .models import Order, OrderItem, Payment, Coupon
 from apps.catalog.models.variants import ProductVariant
-from apps.catalog.serializers import ProductVariantSerializer
+from apps.catalog.serializers.ProductVariant import ProductVariantSerializer
 from apps.accounts.models import Address  # adjust path if different
 from apps.accounts.serializers import AddressSerializer  # we define below
 
