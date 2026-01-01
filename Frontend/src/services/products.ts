@@ -1,6 +1,35 @@
 import qs from "query-string";
 
-export async function getProducts(query: any) {
+/* ---------------- TYPES ---------------- */
+
+export type ProductImage = {
+  url: string;
+  is_primary?: boolean;
+};
+
+export type ProductVariant = {
+  price: number;
+  sale_price?: number | null;
+};
+
+export type Product = {
+  id: string;
+  slug: string;
+  name: string;
+  images?: ProductImage[];
+  variants?: ProductVariant[];
+};
+
+export type ProductResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: any[];
+};
+
+/* ---------------- API ---------------- */
+
+export async function getProducts(query: Record<string, any>): Promise<ProductResponse> {
   const queryString = qs.stringify(query, {
     arrayFormat: "comma",
     skipNull: true,
@@ -9,8 +38,9 @@ export async function getProducts(query: any) {
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/catalog/products/?${queryString}`,
-    { cache: "no-store" ,
-    next: { revalidate: 0 },
+    {
+      cache: "no-store",
+      next: { revalidate: 0 },
     }
   );
 
@@ -19,8 +49,27 @@ export async function getProducts(query: any) {
   }
 
   const data = await res.json();
-  return Array.isArray(data) ? data : data.results ?? [];
+
+  // ✅ NORMALIZE RESPONSE
+  if (Array.isArray(data)) {
+    return {
+      count: data.length,
+      next: null,
+      previous: null,
+      results: data,
+    };
+  }
+
+  // ✅ PAGINATED RESPONSE
+  return {
+    count: data.count ?? data.results?.length ?? 0,
+    next: data.next ?? null,
+    previous: data.previous ?? null,
+    results: data.results ?? [],
+  };
 }
+
+
 
 export async function getProductById(id: string) {
   const res = await fetch(

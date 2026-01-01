@@ -18,8 +18,6 @@ export default async function ProductPage({ params }: Props) {
   const {id} = await params;
   const product = await getProductById(id)
 
-  console.log("Product by Id : ",product)
-
   if (!product) notFound();
 
   const defaultVariant = product.variants?.[0];

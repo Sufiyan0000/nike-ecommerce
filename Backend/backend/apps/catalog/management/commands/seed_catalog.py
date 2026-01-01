@@ -344,7 +344,7 @@ class Command(BaseCommand):
             return
 
         # Decide how many images per product
-        IMAGES_PER_PRODUCT = 2
+        IMAGES_PER_PRODUCT = 1
 
         # Take images from the FRONT of the list
         selected_images = available_images[:IMAGES_PER_PRODUCT]

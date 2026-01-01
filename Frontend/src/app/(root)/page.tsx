@@ -9,7 +9,9 @@ type Props = {
 export default async function Home({ searchParams }: Props) {
   const resolvedSearchParams = await searchParams;
   const query = parseQuery(resolvedSearchParams);
-  const products = await getProducts(query);
+  const data = await getProducts(query);
+
+  const products = data.results;
 
   return (
     <main className="mx-auto w-full  md:max-w-7xl sm:px-2 lg:px-8">

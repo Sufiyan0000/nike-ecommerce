@@ -3,6 +3,9 @@ import { getProducts } from "@/src/services/products";
 import Filters from "@/src/components/Filters";
 import Sort from "@/src/components/Sort";
 import Card from "@/src/components/Card";
+import ProductGrid from "@/src/components/ProductGrid";
+import { log } from "console";
+
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -11,7 +14,12 @@ type Props = {
 export default async function ProductsPage({ searchParams }: Props) {
   const resolvedSearchParams = await searchParams
   const query = parseQuery(resolvedSearchParams);
-  const products = await getProducts(query);
+  const data = await getProducts(query);
+
+  const products = data.results
+  const next = data.next;
+
+  console.log("Total Product : ",data.count)
 
   return (
     <div className="flex gap-6">
