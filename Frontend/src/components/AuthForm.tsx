@@ -31,7 +31,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode = "sign-up",onSubmit }) => {
       onSubmit={(e) => {
         e.preventDefault();
         // auth logic will be wired later
-        onSubmit({ username, email , password});
+        onSubmit(
+          isSignIn ?
+          {email,password}
+          : { username, email , password});
 
       }}
     >

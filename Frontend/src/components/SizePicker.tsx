@@ -1,26 +1,34 @@
 "use client";
 
-import { useState } from "react";
+type Variant = {
+  id: string;
+  size: number;
+};
 
-const SIZES = ["7", "8", "9", "10", "11", "12"];
+type Props = {
+  variants: Variant[];
+  selected: string | null;
+  onSelect: (id: string) => void;
+};
 
-export default function SizePicker() {
-  const [selected, setSelected] = useState<string | null>(null);
-
+export default function SizePicker({ variants, selected, onSelect }: Props) {
+  console.log("Variants: ",variants)
   return (
-    <div className="space-y-2">
-      <p className="font-medium">Select Size</p>
+    <div>
+      <p className="mb-2 font-medium">Select Size</p>
 
       <div className="grid grid-cols-3 gap-3">
-        {SIZES.map((size) => (
+        {variants.map((v) => (
           <button
-            key={size}
-            onClick={() => setSelected(size)}
-            className={`py-3 border rounded-md ${
-              selected === size ? "border-black" : "border-gray-300"
-            }`}
+            key={v.id}
+            onClick={() => onSelect(v.id)}
+            className={`border rounded-md py-3
+              ${selected === v.id
+                ? "border-black"
+                : "border-gray-300"}
+            `}
           >
-            {size}
+            {v.size}
           </button>
         ))}
       </div>

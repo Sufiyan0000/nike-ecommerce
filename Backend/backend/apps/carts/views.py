@@ -30,6 +30,11 @@ class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
+    def get_permissions(self):
+        if self.action in ["current_cart", "add_item", "clear_cart","remove_item"]:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:
@@ -55,7 +60,7 @@ class CartViewSet(viewsets.ModelViewSet):
                 session_token=guest_id,
                 defaults={"expires_at": timezone.now() + timezone.timedelta(days=7)},
             )
-            cart, _ = Cart.objects.get_or_create(guest=guest)
+            cart, _ = Cart.objects.get_or_create(guest_id=guest)
             return cart, guest_id
 
         # No user, no guest -> create a new guest
@@ -64,7 +69,7 @@ class CartViewSet(viewsets.ModelViewSet):
             session_token=new_guest_id,
             expires_at=timezone.now() + timezone.timedelta(days=7),
         )
-        cart = Cart.objects.create(guest=guest)
+        cart = Cart.objects.create(guest_id=guest)
         return cart, new_guest_id
 
     @action(detail=False, methods=["get"], url_path="current")
@@ -122,6 +127,35 @@ class CartViewSet(viewsets.ModelViewSet):
         if guest_id:
             data["guest_id"] = guest_id
         return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=["post"],url_path="current/remove-item")
+    def remove_item(self,request):
+        cart,guest_id = self._get_or_create_current_cart(request)
+        serializer = CartItemSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_variant = serializer.validated_data['product_variant']
+        quantity = serializer.validated_data.get('quantity',1)
+
+        try:
+            item = CartItem.objects.get(cart=cart, product_variant=product_variant)
+        except CartItem.DoesNotExist:
+            return Response(
+                {"detail" : "Item not found in cart"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        if item.quantity > quantity:
+            item.quantity -= quantity
+            item.save()
+        else:
+            item.delete()
+
+        data = CartSerializer(cart).data
+        if guest_id:
+            data["guest_id"] = guest_id
+
+        return Response(data,status=status.HTTP_200_OK)
 
 
 class CartItemViewSet(viewsets.ModelViewSet):

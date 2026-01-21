@@ -12,7 +12,9 @@ export default function RootGroupLayout({
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-light-100">{children}</main>
+      <main className="min-h-screen bg-light-100">
+        {children}
+      </main>
       <Footer />
     </>
   );

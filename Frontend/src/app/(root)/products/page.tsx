@@ -6,30 +6,33 @@ import Card from "@/src/components/Card";
 import ProductGrid from "@/src/components/ProductGrid";
 import { log } from "console";
 
-
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function ProductsPage({ searchParams }: Props) {
-  const resolvedSearchParams = await searchParams
+  const resolvedSearchParams = await searchParams;
   const query = parseQuery(resolvedSearchParams);
   const data = await getProducts(query);
 
-  const products = data.results
+  const products = data.results;
   const next = data.next;
 
-  console.log("Total Product : ",data.count)
+  console.log("Total Product : ", data.count);
 
   return (
     <div className="flex gap-6">
       <aside className="hidden md:block w-64 ml-16 mt-16">
-        <Filters />
+        <div className="sticky top-24">
+          <Filters />
+        </div>
       </aside>
 
       <main className="flex-1">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-semibold mt-4">Products : {products.length} </h1>
+          <h1 className="text-2xl font-semibold mt-4">
+            Products : {products.length}{" "}
+          </h1>
           <Sort />
         </div>
 

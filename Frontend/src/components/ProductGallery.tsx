@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Check, ImageOff } from "lucide-react";
 
 type Variant = {
+  id: string;
   color: string;
   swatch: string;
   images: string[];
@@ -19,6 +20,8 @@ export default function ProductGallery({
   const [activeImage, setActiveImage] = useState(
     variants[0]?.images?.[0]
   );
+
+  console.log("Active Image URL:", activeImage);
 
   if (!activeVariant?.images?.length) {
     return (
@@ -38,6 +41,7 @@ export default function ProductGallery({
           fill
           className="object-contain"
           sizes="(min-width: 768px) 50vw, 100vw"
+          unoptimized
         />
       </div>
 
@@ -57,6 +61,7 @@ export default function ProductGallery({
               width={60}
               height={60}
               className="object-contain"
+              unoptimized
             />
           </button>
         ))}
@@ -66,7 +71,7 @@ export default function ProductGallery({
       <div className="flex gap-3">
         {variants.map((v) => (
           <button
-            key={v.color}
+            key={v.id}
             onClick={() => {
               setActiveVariant(v);
               setActiveImage(v.images[0]);

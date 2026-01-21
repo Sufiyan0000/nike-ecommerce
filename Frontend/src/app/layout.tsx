@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import { Jost } from "next/font/google";
 import "./globals.css";
 import { NextFontWithVariable } from "next/dist/compiled/@next/font";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import { AuthProvider } from "../context/AuthContext";
+import CartBootstrap from "../components/CartBootstrap";
 
-const jost:NextFontWithVariable = Jost({
+const jost: NextFontWithVariable = Jost({
   variable: "--font-jost",
   subsets: ["latin"],
 });
-
 
 export const metadata: Metadata = {
   title: "Nike e-commerce",
@@ -23,14 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${jost.className} antialiased overflow-x-hidden`}
-      >
-
-        <main className="min-h-screen bg-light-100 text-dark-900">
+      <body className={`${jost.className} antialiased overflow-x-hidden`}>
+        <AuthProvider>
+          <CartBootstrap />
           {children}
-        </main>
-        
+        </AuthProvider>
       </body>
     </html>
   );

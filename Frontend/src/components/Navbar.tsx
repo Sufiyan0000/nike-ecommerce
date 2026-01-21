@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth } from "../context/AuthContext";
 
 interface NavItem {
   label: string;
@@ -24,12 +25,16 @@ const defaultNavItems: NavItem[] = [
   { label: "Contact", href: "/contact" },
 ];
 
+
 const Navbar: React.FC<NavbarProps> = ({
   logoSrc = "/logo.svg", // put your Nike-style logo in /public/logo.svg
   navItems = defaultNavItems,
   cartCount = 2,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+
+  console.log("Auth User:",user);
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-neutral-200">
@@ -41,7 +46,7 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-2  rounded px-2 py-1">
           <Link href="/" aria-label="Home">
             <Image
-              src='/logo.svg'
+              src="/logo.svg"
               alt="Brand logo"
               width={30}
               height={30}
@@ -83,10 +88,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile actions */}
         <div className="flex items-center gap-3 lg:hidden">
-          <button
-            type="button"
-            className="text-md font-medium text-dark-900"
-          >
+          <button type="button" className="text-md font-medium text-dark-900">
             Search
           </button>
           <button
@@ -103,6 +105,29 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
       </nav>
 
+      {/* AUTH */}
+      <div className="absolute right-10 top-4 hidden lg:flex">
+        {user ? (
+          <span className="text-gray-800">
+            Hi, <span className="font-semibold">{user.name}</span>
+          </span>
+        ) : (
+          <Link
+            href="/sign-up"
+            className="
+              px-4 py-2
+              rounded-full
+              bg-black text-white
+              text-sm font-medium
+              transition
+              hover:bg-black/80
+  "
+          >
+            Sign up
+          </Link>
+        )}
+      </div>
+
       {/* Mobile menu */}
       {isOpen && (
         <div className="border-t border-neutral-200 bg-white lg:hidden">
@@ -112,7 +137,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 key={item.href}
                 href={item.href}
                 className="py-1 transition-colors hover:text-dark-700"
-                onClick={() => setIsOpen(false)}
+                onClick={(prev) => setIsOpen(!prev)}
               >
                 {item.label}
               </Link>
@@ -124,12 +149,14 @@ const Navbar: React.FC<NavbarProps> = ({
               >
                 Search
               </button>
-              <button
+              <Link
+              href='/cart'
                 type="button"
                 className="transition-colors hover:text-neutral-500"
+                onClick={(prev) => setIsOpen(!prev)}
               >
                 My Cart ({cartCount})
-              </button>
+              </Link>
             </div>
           </div>
         </div>

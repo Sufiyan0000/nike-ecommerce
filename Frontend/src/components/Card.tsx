@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { addToCart } from "../lib/api";
 
 type ProductImage = {
   url: string;
@@ -7,6 +10,7 @@ type ProductImage = {
 };
 
 type ProductVariant = {
+  id: string;
   price: number;
   sale_price?: number | null;
 };
@@ -33,10 +37,22 @@ export default function Card({ product }: CardProps) {
     product.images?.find((img) => img.is_primary) ??
     product.images?.[0];
 
+    console.log("Product : ",product)
+
   const imageSrc = imageObj?.url ?? null;
 
   const basePrice = product.variants?.[0]?.price;
   const salePrice = product.variants?.[0]?.sale_price;
+
+  const handleAddToCart = async ({productVariantId, quantity}: {productVariantId: string; quantity?: number}) => {
+    try {
+      // Call addToCart API here
+      const res = await addToCart(productVariantId,quantity ?? 1);
+      console.log("Added to cart:", res);
+    }catch(error){
+      console.error("Error adding to cart:", error);
+    }
+  }
 
   return (
     <div className="group relative rounded-xl border border-gray-200 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl w-80 mx-auto md:w-[24rem] md:mr-5">
@@ -98,6 +114,7 @@ export default function Card({ product }: CardProps) {
           opacity-0 translate-y-2 transition-all duration-300
           group-hover:opacity-100 group-hover:translate-y-0
           hover:bg-gray-900 hover:cursor-pointer"
+          onClick={() => handleAddToCart({productVariantId: product.variants?.[0]?.id ?? '', quantity: 1})}
         >
           Add to Cart
         </button>

@@ -1,22 +1,42 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { Heart, ShoppingBag, Star } from "lucide-react";
-
-import { PRODUCTS } from "@/src/lib/mock-products";
 import ProductGallery from "@/src/components/ProductGallery";
-import SizePicker from "@/src/components/SizePicker";
 import CollapsibleSection from "@/src/components/CollapsibleSection";
 import Card from "@/src/components/Card";
-import { parseQuery } from "@/src/lib/utils/query";
 import { getProductById, getProducts } from "@/src/services/products";
+import AddToCartSection from "@/src/components/AddToCartSection";
+import { SizeVariant } from "@/src/types/cart";
 
-type Props = {
+type PageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Record<string,string | string[] | undefined>;
 };
+;
 
-export default async function ProductPage({ params }: Props) {
+
+export default async function ProductPage({ params }: PageProps) {
   const {id} = await params;
   const product = await getProductById(id)
+
+  const sizeVariants: SizeVariant[] = Array.from(
+    new Map<string,SizeVariant>(
+      product.variants.map((v: any) => [
+        v.size.id,
+        {
+          id: v.size.id,
+          size: Number(v.size.name),
+        }
+      ])
+    ).values()
+  ).sort((a:any,b:any) => a.size - b.size);
+
+  const relatedData = await getProducts({
+  category: product.category.slug,
+  page_size: "4",
+});
+
+const relatedProducts = relatedData.results;
+
 
   if (!product) notFound();
 
@@ -32,22 +52,24 @@ export default async function ProductPage({ params }: Props) {
     ? Math.round(((compareAt - price) / compareAt) * 100)
     : 0;
 
-    const galleryVariants = product.variants.reduce((acc: any[], v: any) => {
+  const galleryVariants = product.variants.reduce((acc: any[], v: any) => {
   const colorSlug = v.color.slug;
 
-  let existing = acc.find((x) => x.color === colorSlug);
+  let existing = acc.find((x) => x.id === colorSlug);
 
   if (!existing) {
     existing = {
+      id: colorSlug, // ✅ FIXED
       color: v.color.name,
       swatch: v.color.hex_code ?? "#000",
-      images: product.images.map((img: any) => img.url),
+      images: product.images.map((img:any) => img.url),
     };
     acc.push(existing);
   }
 
   return acc;
 }, []);
+
 
 
 
@@ -93,20 +115,9 @@ export default async function ProductPage({ params }: Props) {
             {product.description}
           </p>
 
-          <SizePicker />
-
-          {/* CTA */}
-          <div className="flex gap-4">
-            <button className="flex-1 bg-black text-white py-4 rounded-full flex items-center justify-center gap-2">
-              <ShoppingBag size={18} />
-              Add to Bag
-            </button>
-
-            <button className="w-14 h-14 border rounded-full flex items-center justify-center">
-              <Heart size={20} />
-            </button>
-          </div>
-
+          <AddToCartSection
+          variants={sizeVariants}
+/>
           {/* COLLAPSIBLE */}
           <CollapsibleSection title="Product Details">
             Premium running shoe designed for everyday training.
@@ -129,27 +140,22 @@ export default async function ProductPage({ params }: Props) {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2">
-  {PRODUCTS.map((item) => (
-    <Card
-      key={item.id}
-      className=""
-      product={{
-        description:"something",
-        id: item.id,
-        slug: item.id, // mock slug
-        name: item.title, // map title → name
-        images: item.images.map((img, index) => ({
-          url: img,
-          is_primary: index === 0,
-        })),
-        variants: [
-          {
-            price: item.price,
-          },
-        ],
-      }}
-    />
-  ))}
+  {relatedProducts
+      .filter((p) => p.id !== product.id) // ❗ exclude current product
+      .slice(0, 3) // show only 3
+      .map((item) => (
+        <Card
+          key={item.id}
+          product={{
+            id: item.id,
+            slug: item.slug,
+            name: item.name,
+            description: item.description ?? "",
+            images: item.images,
+            variants: item.variants,
+          }}
+        />
+      ))}
 </div>
 
       </section>

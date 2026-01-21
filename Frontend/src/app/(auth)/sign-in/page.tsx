@@ -1,23 +1,31 @@
 // src/app/(auth)/sign-in/page.tsx
 'use client';
 
-
 import Link from "next/link";
 import SocialProviders from "@/src/components/SocialProviders";
 import AuthForm from "@/src/components/AuthForm";
 import { useState } from "react";
-import { signIn } from "@/src/lib/api";
+import { signIn,getMe } from "@/src/lib/api";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function SignInPage() {
 
+  const {setUser} = useAuth();
   const [msg,setMsg] = useState('');
   const router = useRouter();
 
-  const handleSignIn = async ({ email,password}: any) => {
+  const handleSignIn = async ({ email,password}: {
+    email: string;
+    password: string;
+  }) => {
+    
     try{
       const res = await signIn(email,password);
-      setMsg(res.data.message);
+
+      const me = await getMe();
+      setUser(me);
+      
       router.push('/');
     }catch(e:any){
       setMsg(e.response?.data?.error ?? "Login failed.");
