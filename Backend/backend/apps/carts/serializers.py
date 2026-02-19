@@ -6,7 +6,7 @@ from .models import Cart, CartItem
 from apps.catalog.models.variants import ProductVariant
 from apps.catalog.serializers.ProductVariant import ProductVariantSerializer
 
-
+from apps.catalog.serializers.serializers import ProductImageSerializer
 
 class CartItemSerializer(serializers.ModelSerializer):
     # For writing: send variant id
@@ -18,6 +18,10 @@ class CartItemSerializer(serializers.ModelSerializer):
         source="product_variant", read_only=True
     )
 
+    product_images = ProductImageSerializer(
+        source="product_variant.product.images",many = True,read_only = True
+    )
+
     class Meta:
         model = CartItem
         fields = [
@@ -25,6 +29,7 @@ class CartItemSerializer(serializers.ModelSerializer):
             "cart",
             "product_variant",
             "product_variant_detail",
+            "product_images",
             "quantity",
         ]
         read_only_fields = ["id", "cart", "product_variant_detail"]
@@ -55,9 +60,14 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_total_amount(self, obj):
         total = 0
-        for item in obj.items.select_related("product_variant"):
+        for item in obj.items.select_related(
+            "product_variant",
+            "product_variant__product"
+        ).prefetch_related(
+            "product_variant__product__images"
+        ):
             variant = item.product_variant
             price = variant.sale_price or variant.price
-            if price is not None:
+            if price:
                 total += price * item.quantity
         return total

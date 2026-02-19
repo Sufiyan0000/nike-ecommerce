@@ -15,8 +15,11 @@ type PageProps = {
 
 
 export default async function ProductPage({ params }: PageProps) {
+  
   const {id} = await params;
+  // console.log('ID: ',id)
   const product = await getProductById(id)
+  console.log('Product: ',product)
 
   const sizeVariants: SizeVariant[] = Array.from(
     new Map<string,SizeVariant>(
@@ -30,10 +33,14 @@ export default async function ProductPage({ params }: PageProps) {
     ).values()
   ).sort((a:any,b:any) => a.size - b.size);
 
+  console.log('Size Variant: ',sizeVariants)
+
   const relatedData = await getProducts({
   category: product.category.slug,
   page_size: "4",
 });
+
+// console.log("Related Data:",relatedData )
 
 const relatedProducts = relatedData.results;
 
@@ -41,6 +48,8 @@ const relatedProducts = relatedData.results;
   if (!product) notFound();
 
   const defaultVariant = product.variants?.[0];
+
+  console.log("Default Variant: ",defaultVariant)
 
   if (!defaultVariant) notFound();
 
@@ -117,6 +126,7 @@ const relatedProducts = relatedData.results;
 
           <AddToCartSection
           variants={sizeVariants}
+          productVariantId={defaultVariant.id}
 />
           {/* COLLAPSIBLE */}
           <CollapsibleSection title="Product Details">

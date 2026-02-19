@@ -1,5 +1,6 @@
 // src/app/(auth)/layout.tsx
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AuthLayout({
   children,
@@ -13,6 +14,7 @@ export default function AuthLayout({
         {/* Logo */}
         <div className="flex items-center gap-3 ">
           <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-light-100">
+            <Link href={"/"}>
             <Image
               src="/logo.svg" // white logo works great on dark background
               alt="Nike logo"
@@ -21,6 +23,8 @@ export default function AuthLayout({
               className="h-5 w-7 invert"
               priority
             />
+            </Link>
+            
           </div>
         </div>
 

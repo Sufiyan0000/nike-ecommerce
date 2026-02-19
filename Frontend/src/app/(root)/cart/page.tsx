@@ -1,7 +1,11 @@
-"use client";
+'use client';
 
 import CartItem from "@/src/components/cart/CartItem";
 import CartSummary from "@/src/components/cart/CartSummary";
+import CartView from "@/src/components/cart/CartView";
+import { getCart } from "@/src/lib/api";
+import { useCartStore } from "@/src/store/cart.store";
+import { useEffect } from "react";
 
 const cartItems = [
   {
@@ -16,24 +20,13 @@ const cartItems = [
 ];
 
 export default function CartPage() {
+  const fetchCart = useCartStore((state) => state.fetchCart);
+
+  useEffect(() => {
+    fetchCart();
+  },[fetchCart])
+
   return (
-    <div className="min-h-screen bg-white px-6 py-12 lg:px-24">
-      {/* Page Title */}
-      <h1 className="text-2xl font-semibold tracking-tight mb-10">
-        Bag
-      </h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-8">
-          {cartItems.map((item) => (
-            <CartItem key={item.id} item={item} />
-          ))}
-        </div>
-
-        {/* Summary */}
-        <CartSummary />
-      </div>
-    </div>
+    <CartView />
   );
 }

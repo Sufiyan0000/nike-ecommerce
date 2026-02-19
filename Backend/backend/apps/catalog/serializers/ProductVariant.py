@@ -17,7 +17,9 @@ class SizeSerializer(serializers.ModelSerializer):
 class ProductVariantSerializer(serializers.ModelSerializer):
     
     product_id = serializers.PrimaryKeyRelatedField(
+        source="product",
         queryset = Product.objects.all(),
+        write_only= True,
     )
     color = ColorSerializer(read_only=True)
     size = SizeSerializer(read_only=True)

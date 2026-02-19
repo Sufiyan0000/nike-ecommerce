@@ -4,6 +4,7 @@ import "./globals.css";
 import { NextFontWithVariable } from "next/dist/compiled/@next/font";
 import { AuthProvider } from "../context/AuthContext";
 import CartBootstrap from "../components/CartBootstrap";
+import LenisProvider from "../providers/LenisProvider";
 
 const jost: NextFontWithVariable = Jost({
   variable: "--font-jost",
@@ -23,10 +24,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${jost.className} antialiased overflow-x-hidden`}>
-        <AuthProvider>
-          <CartBootstrap />
-          {children}
-        </AuthProvider>
+        <LenisProvider>
+          <AuthProvider>
+            <CartBootstrap />
+            {children}
+          </AuthProvider>
+        </LenisProvider>
       </body>
     </html>
   );

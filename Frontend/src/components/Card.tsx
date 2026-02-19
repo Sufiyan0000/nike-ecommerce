@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { addToCart } from "../lib/api";
+import { useCartStore } from "../store/cart.store";
+import { useState } from "react";
+import Lottie from 'lottie-react'
+import addToCartAnim from "@/src/assets/addToCart.json"
 
 type ProductImage = {
   url: string;
@@ -33,25 +36,31 @@ type CardProps = {
 export default function Card({ product }: CardProps) {
   if (!product) return null;
 
+  const [showAnim,setShowAnim] = useState(false);
+
   const imageObj =
     product.images?.find((img) => img.is_primary) ??
     product.images?.[0];
-
-    console.log("Product : ",product)
 
   const imageSrc = imageObj?.url ?? null;
 
   const basePrice = product.variants?.[0]?.price;
   const salePrice = product.variants?.[0]?.sale_price;
+  const addToCart = useCartStore((state) => state.addItem);
 
   const handleAddToCart = async ({productVariantId, quantity}: {productVariantId: string; quantity?: number}) => {
     try {
       // Call addToCart API here
-      const res = await addToCart(productVariantId,quantity ?? 1);
-      console.log("Added to cart:", res);
+       await addToCart(productVariantId, 1);
+      
+      // console.log("Added to cart:", res);
     }catch(error){
       console.error("Error adding to cart:", error);
     }
+
+    setShowAnim(true);
+    setTimeout(() => setShowAnim(false), 2000);
+    
   }
 
   return (
@@ -79,14 +88,14 @@ export default function Card({ product }: CardProps) {
       {/* CONTENT */}
       <div className="p-4 space-y-2">
         {/* NAME */}
-        <h3 className="text-base font-semibold text-gray-900 leading-snug line-clamp-2">
+        <Link href={`/products/${product.id}`} className="text-base font-semibold text-gray-900 leading-snug line-clamp-2">
           {product.name}
-        </h3>
+        </Link>
 
         {/* DESCRIPTION */}
-        <p className="text-sm text-gray-500 line-clamp-2 ">
+        <Link href={`/products/${product.id}`} className="text-sm text-gray-500 line-clamp-2 ">
           {product.description}
-        </p>
+        </Link>
 
         {/* PRICE */}
         {basePrice !== undefined && (
@@ -109,15 +118,20 @@ export default function Card({ product }: CardProps) {
         )}
 
         {/* ADD TO CART */}
-        <button
-          className="mt-3 w-full rounded-lg bg-black text-white text-sm font-medium py-2
-          opacity-0 translate-y-2 transition-all duration-300
-          group-hover:opacity-100 group-hover:translate-y-0
-          hover:bg-gray-900 hover:cursor-pointer"
+        <div className="relative group pb-3">
+          <button
+          className={`mt-3 w-full rounded-lg ${showAnim? 'bg-neutral-200 text-neutral-800 ':'bg-gray-900 text-neutral-100'}  text-sm font-medium py-2
+          lg:opacity-0 translate-y-2 transition-all duration-300
+          group-hover:lg:opacity-100 group-hover:translate-y-0
+          ${showAnim? 'hover:bg-neutral-200':'hover:bg-neutral-900'} hover:cursor-pointer`}
           onClick={() => handleAddToCart({productVariantId: product.variants?.[0]?.id ?? '', quantity: 1})}
         >
-          Add to Cart
+          {showAnim ? 
+          'Congratulations! Item Added': 'Add To Cart'}
         </button>
+         {/* LOTTIE ANIMATION */}
+        </div>
+        
       </div>
     </div>
   );

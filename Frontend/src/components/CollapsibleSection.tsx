@@ -13,14 +13,14 @@ export default function CollapsibleSection({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-t pt-4">
+    <div className="border-t border-neutral-400 pt-4">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex justify-between items-center"
       >
         <span className="font-medium">{title}</span>
         <ChevronDown
-          className={`transition ${open ? "rotate-180" : ""}`}
+          className={`text-neutral-500 transition ${open ? "rotate-180" : ""}`}
         />
       </button>
 

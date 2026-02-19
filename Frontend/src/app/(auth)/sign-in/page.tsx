@@ -8,12 +8,14 @@ import { useState } from "react";
 import { signIn,getMe } from "@/src/lib/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/context/AuthContext";
+import { useCartStore } from "@/src/store/cart.store";
 
 export default function SignInPage() {
 
   const {setUser} = useAuth();
   const [msg,setMsg] = useState('');
   const router = useRouter();
+  const fetchCart = useCartStore((state) => state.fetchCart);
 
   const handleSignIn = async ({ email,password}: {
     email: string;
@@ -25,6 +27,8 @@ export default function SignInPage() {
 
       const me = await getMe();
       setUser(me);
+
+      await fetchCart();
       
       router.push('/');
     }catch(e:any){

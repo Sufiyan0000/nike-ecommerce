@@ -1,21 +1,29 @@
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import { useCartStore } from "../store/cart.store";
 import { axiosClient } from "./axiosClient";
 
 export async function signIn(email: string,password:string){
 
-    const res = await axiosClient.post("/auth/login/",{
+    const res = await axiosClient.post("/auth/token/",{
         email,
         password
     });
 
+    console.log("Login response:", res.data);
+
     localStorage.setItem("access_token",res.data.access)
     localStorage.setItem("refresh_token",res.data.refresh)
 
-    return res.data;
+    localStorage.removeItem('guest_id');
+    
+    const me = await getMe();
+
+    return me;
 }
 
 export async function signUp(email: string,password:string,name:string){
     
-    const res = await axiosClient.post("/auth/login/",{
+    const res = await axiosClient.post("/auth/sign-up/",{
         email,
         password,
         name
@@ -33,7 +41,12 @@ export async function getMe() {
 }
 
 export async function signOut(){
-    return axiosClient.post("/auth/sign-out/","");
+    await axiosClient.post("/auth/sign-out/","");
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("access_token");
+
+    return true;
 }
 
 export async function ensureGuestSession(){

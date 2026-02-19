@@ -24,29 +24,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 🔥 Restore auth on refresh using JWT
   useEffect(() => {
-    const initAuth = async () => {
+  const initAuth = async () => {
+    try {
       const token = localStorage.getItem("access_token");
 
       if (!token) {
+        setUser(null);
         setLoading(false);
         return;
       }
 
-      try {
-        const me = await getMe();
-        setUser(me);
-      } catch (error) {
-        // token invalid / expired
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const me = await getMe();   // validate token with backend
+      setUser(me);
 
-    initAuth();
-  }, []);
+    } catch (error) {
+      // token invalid / expired
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      setUser(null);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  initAuth();
+}, []);
+
 
   const value = useMemo(() => {
     return { user, setUser, loading };

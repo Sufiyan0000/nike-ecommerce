@@ -3,8 +3,7 @@ import { getProducts } from "@/src/services/products";
 import Filters from "@/src/components/Filters";
 import Sort from "@/src/components/Sort";
 import Card from "@/src/components/Card";
-import ProductGrid from "@/src/components/ProductGrid";
-import { log } from "console";
+
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
