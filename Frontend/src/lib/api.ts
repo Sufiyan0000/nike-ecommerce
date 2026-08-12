@@ -9,8 +9,6 @@ export async function signIn(email: string,password:string){
         password
     });
 
-    console.log("Login response:", res.data);
-
     localStorage.setItem("access_token",res.data.access)
     localStorage.setItem("refresh_token",res.data.refresh)
 
@@ -44,7 +42,7 @@ export async function signOut(){
     await axiosClient.post("/auth/sign-out/","");
 
     localStorage.removeItem("access_token");
-    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
 
     return true;
 }

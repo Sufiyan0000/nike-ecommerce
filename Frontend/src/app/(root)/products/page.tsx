@@ -21,7 +21,7 @@ export default async function ProductsPage({ searchParams }: Props) {
 
   return (
     <div className="flex gap-6">
-      <aside className="hidden md:block w-64 ml-16 mt-16">
+      <aside className="hidden md:block md:w-30 w-64 md:ml-10 ml-16 mt-16">
         <div className="sticky top-24">
           <Filters />
         </div>
@@ -29,7 +29,7 @@ export default async function ProductsPage({ searchParams }: Props) {
 
       <main className="flex-1">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-semibold mt-4">
+          <h1 className="text-2xl font-semibold mt-4 mx-15 md:mx-0">
             Products : {products.length}{" "}
           </h1>
           <Sort />
@@ -38,7 +38,7 @@ export default async function ProductsPage({ searchParams }: Props) {
         {products.length === 0 ? (
           <p className="text-gray-500">No products found 😕</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:gap-3 gap-4">
             {products.map((product: any) => (
               <Card key={product.id} product={product} />
             ))}

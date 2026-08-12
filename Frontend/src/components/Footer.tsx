@@ -55,9 +55,9 @@ const defaultColumns: FooterColumn[] = [
 ];
 
 const Footer: React.FC<FooterProps> = ({
-  logoSrc = "@/public/logo.svg", // add a white logo to /public
+  logoSrc = "@/public/StrideXBlack.png", // add a white logo to /public
   columns = defaultColumns,
-  copyrightName = "Nike Inc.",
+  copyrightName = "StrideX Inc.",
 }) => {
   const year = new Date().getFullYear();
 
@@ -69,7 +69,7 @@ const Footer: React.FC<FooterProps> = ({
         {/* Left: logo */}
         <div className="flex items-start gap-4">
           <Image
-            src={finalLogo}
+            src='/StrideXBlack.png'
             alt="Brand logo"
             width={56}
             height={56}

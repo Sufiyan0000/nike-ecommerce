@@ -67,9 +67,9 @@ export default function Filters() {
         return (
           <div key={key}>
             {/* HEADER */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <div className="flex flex-wrap items-center justify-between md:gap-0.5 gap-2 mb-2">
               <div className="flex items-center gap-1">
-                <h3 className="font-semibold capitalize text-lg">
+                <h3 className={`font-semibold capitalize text-lg ${key === 'gender' ? 'md:ml-[-20px]':''}`}>
                   {key}
                 </h3>
 

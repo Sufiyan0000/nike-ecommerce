@@ -64,7 +64,7 @@ export default function Card({ product }: CardProps) {
   }
 
   return (
-    <div className="group relative rounded-xl border border-gray-200 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl w-80 mx-auto md:w-[24rem] md:mr-5">
+    <div className="group relative rounded-xl border border-gray-200 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl w-80 mx-auto md:w-[22rem] md:mr-5">
       {/* IMAGE */}
       <Link href={`/products/${product.id}`}>
         <div className="relative aspect-square bg-gray-100 overflow-hidden">

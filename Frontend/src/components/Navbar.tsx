@@ -72,11 +72,11 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-2  rounded px-2 py-1">
           <Link href="/" aria-label="Home">
             <Image
-              src="/logo.svg"
+              src="/StrideX.png"
               alt="Brand logo"
-              width={30}
-              height={30}
-              className="h-4 w-15 sm:h-7 invert"
+              width={60}
+              height={60}
+              className="w-15 h-15 sm:w-26 sm:h-16 object-contain"
               priority
             />
           </Link>
@@ -128,10 +128,10 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-10 lg:hidden">
           {user ? (
             <Link
-              href={"sign-up"}
+              href={""}
               className="relative transition-colors hover:text-neutral-500"
             >
-              <Image src={loggedImg} alt="" className="w-9" />
+              <Image src={loggedImg} alt={user.name || 'UserImg'} className="w-9" />
             </Link>
           ) : (
             <Link
@@ -152,15 +152,7 @@ const Navbar: React.FC<NavbarProps> = ({
             {/* Badge */}
             {cart?.total_items > 0 && (
               <span
-                className="
-        absolute -top-2 -right-2
-        min-w-[18px] h-[18px]
-        px-1
-        flex items-center justify-center
-        text-[11px] font-semibold
-        bg-red-500 text-white
-        rounded-full
-      "
+                className=" absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[11px] font-semibold bg-red-500 text-white rounded-full "
               >
                 {cart?.total_items > 9 ? "9+" : cart?.total_items}
               </span>
@@ -211,17 +203,12 @@ const Navbar: React.FC<NavbarProps> = ({
               className="relative transition-colors font-medium text-md hover:text-neutral-500 flex justify-center items-center gap-2"
             >
               <Image src={loggedImg} alt="" className="w-9" />
-              <span>{user.name}</span>
+              <span className="">{user.name}</span>
             </Link>
             <p className="font-medium text-md">|</p>
             <button
               onClick={handleLogout}
-              className="
-    rounded-lg
-    transition underline
-    text-md font-medium hover:cursor-pointer
-    hover:scale-105
-  "
+              className="rounded-lg transition underline text-md font-medium hover:cursor-pointer hover:scale-105"
             >
               Logout
             </button>
@@ -245,7 +232,7 @@ const Navbar: React.FC<NavbarProps> = ({
               <Link
                 key={item.href}
                 href={item.href}
-                className="py-1 transition-colors hover:text-dark-700"
+                className="py-1 px-3 transition-colors hover:text-dark-700 hover:bg-gray-100 duration-200"
                 onClick={(prev) => setIsOpen(!prev)}
               >
                 {item.label}
@@ -261,30 +248,18 @@ const Navbar: React.FC<NavbarProps> = ({
               <div>
                 {user ? (
                   <button
-                onClick={handleLogout}
-                className="
-    px-4 py-2 rounded-lg
-    bg-neutral-100 text-neutral-900
-    hover:scale-105
-    transition
-    text-md font-normal hover:cursor-pointer
-    
-  "
-              >
-                Logout
-              </button>
-                ):(
+                    onClick={handleLogout}
+                    className="px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 hover:scale-105 transition text-md font-normal hover:cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                ) : (
                   <Link href={'sign-in'}
-                  className="px-4 py-2 rounded-lg
-    bg-neutral-100 text-neutral-900
-    hover:scale-105
-    transition
-    text-md font-normal hover:cursor-pointer" >
+                    className="px-4 py-2 rounded-lg bg-neutral-100 text-neutral-900 hover:scale-105 transition text-md font-normal hover:cursor-pointer" >
                     Login
                   </Link>
                 )}
               </div>
-              
             </div>
           </div>
         </div>
